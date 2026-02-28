@@ -8,8 +8,31 @@
 #include <dt-bindings/pwm/pwm.h>
 #include <dt-bindings/input/input.h>
 #include "rk3399.dtsi"
-#include "rk3399-linux.dtsi"
+#include "rk3399-android.dtsi"
 #include "rk3399-opp.dtsi"
+#include "rk3399-vop-clk-set.dtsi"
+
+&firmware_android {
+	status = "disabled";
+	compatible = "android,firmware";
+	boot_devices = "fe330000.sdhci";
+	vbmeta {
+		status = "disabled";
+		compatible = "android,vbmeta";
+		parts = "vbmeta,boot,system,vendor,dtbo";
+	};
+	fstab {
+		status = "disabled";
+		compatible = "android,fstab";
+		vendor {
+			compatible = "android,vendor";
+			dev = "/dev/block/by-name/vendor";
+			type = "ext4";
+			mnt_flags = "ro,barrier=1,inode_readahead_blks=8";
+			fsmgr_flags = "wait,avb";
+		};
+	};
+};
 
 / {
 
@@ -177,6 +200,50 @@
 		status = "okay";
 	};
 
+	leds {
+		compatible = "gpio-leds";
+		status = "okay";
+
+		yellow {
+			label = "rock960:yellow:wifi";
+			linux,default-trigger = "rfkill0";
+			default-state = "on";
+			gpios = <&gpio4 29 GPIO_ACTIVE_HIGH>;
+		};
+
+		blue {
+			label = "rock960:blue:bluetooth";
+			linux,default-trigger = "rfkill1";
+			default-state = "on";
+			gpios = <&gpio4 30 GPIO_ACTIVE_HIGH>;
+		};
+
+		green@0 {
+			label = "rock960:green:user0";
+			linux,default-trigger = "none";
+			default-state = "off";
+			gpios = <&gpio4 18 GPIO_ACTIVE_HIGH>;
+		};
+		green@1 {
+			label = "rock960:green:user1";
+			linux,default-trigger = "none";
+			default-state = "off";
+			gpios = <&gpio4 22 GPIO_ACTIVE_HIGH>;
+		};
+		green@2 {
+			label = "rock960:green:user2";
+			linux,default-trigger = "none";
+			default-state = "off";
+			gpios = <&gpio4 24 GPIO_ACTIVE_HIGH>;
+		};
+		green@3 {
+			label = "rock960:green:user3";
+			linux,default-trigger = "none";
+			default-state = "off";
+			gpios = <&gpio4 28 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
 	test-power {
 		status = "okay";
 	};
@@ -187,6 +254,78 @@
 	#size-cells = <0>;
 	#sound-dai-cells = <0>;
 	status = "okay";
+};
+
+&dsi {
+    status = "okay";
+    rockchip,dual-channel = <&dsi1>;
+    enable-gpios = <&gpio1 RK_PC6 GPIO_ACTIVE_HIGH>;
+
+    panel: panel@0 {
+        compatible ="simple-panel-dsi";
+        reg = <0>;
+        status = "okay";
+
+        dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST)>;
+        dsi,format = <MIPI_DSI_FMT_RGB888>;
+        dsi,lanes = <4>;
+
+        display-timings {
+            native-mode = <&timing0>;
+
+            timing0: timing0 {
+                clock-frequency = <67000000>;
+                hactive = <1280>;
+                vactive = <720>;
+                hback-porch = <120>;
+                hfront-porch = <12>;
+                vback-porch = <4>;
+                vfront-porch = <4>;
+                hsync-len = <112>;
+                vsync-len = <12>;
+                hsync-active = <0>;
+                vsync-active = <0>;
+                de-active = <0>;
+                pixelclk-active = <0>;
+            };
+        };
+    };
+};
+
+&dsi1 {
+    status = "okay";
+};
+
+&dp_in_vopl {
+       status = "disabled";
+};
+
+&edp_in_vopb {
+       status = "disabled";
+};
+
+&edp_in_vopl {
+       status = "disabled";
+};
+
+&edp_in_vopl {
+       status = "disabled";
+};
+
+&dsi_in_vopl {
+    status = "okay";
+};
+
+&dsi_in_vopb {
+    status = "disabled";
+};
+
+&dsi1_in_vopl {
+    status = "disabled";
+};
+
+&dsi1_in_vopb {
+    status = "disabled";
 };
 
 &sdmmc {
@@ -512,70 +651,6 @@
 
 &i2c2 {
 	status = "okay";
-	camera0: camera-module@10 {
-		status = "disabled";
-		compatible = "omnivision,ov13850-v4l2-i2c-subdev";
-		reg = < 0x10 >;
-		device_type = "v4l2-i2c-subdev";
-		clocks = <&cru SCLK_CIF_OUT>;
-		clock-names = "clk_cif_out";
-		pinctrl-names = "rockchip,camera_default",
-				"rockchip,camera_sleep";
-		pinctrl-0 = <&cam0_default_pins>;
-		pinctrl-1 = <&cam0_sleep_pins>;
-		//rockchip,pd-gpio = <&gpio4 4 GPIO_ACTIVE_LOW>;
-		rockchip,pwr-gpio = <&gpio4 4 GPIO_ACTIVE_HIGH>;
-		rockchip,rst-gpio = <&gpio3 29 GPIO_ACTIVE_LOW>;
-		rockchip,camera-module-mclk-name = "clk_cif_out";
-		rockchip,camera-module-facing = "back";
-		rockchip,camera-module-name = "cmk-cb0695-fv1";
-		rockchip,camera-module-len-name = "lg9569a2";
-		rockchip,camera-module-fov-h = "66.0";
-		rockchip,camera-module-fov-v = "50.1";
-		rockchip,camera-module-orientation = <0>;
-		rockchip,camera-module-iq-flip = <0>;
-		rockchip,camera-module-iq-mirror = <0>;
-		rockchip,camera-module-flip = <1>;
-		rockchip,camera-module-mirror = <0>;
-
-		rockchip,camera-module-defrect0 = <2112 1568 0 0 2112 1568>;
-		rockchip,camera-module-defrect1 = <4224 3136 0 0 4224 3136>;
-		rockchip,camera-module-defrect3 = <3264 2448 0 0 3264 2448>;
-		rockchip,camera-module-flash-support = <1>;
-		rockchip,camera-module-mipi-dphy-index = <0>;
-	};
-
-	camera1: camera-module@36 {
-		status = "disabled";
-		compatible = "omnivision,ov4690-v4l2-i2c-subdev";
-		reg = <0x36>;
-		device_type = "v4l2-i2c-subdev";
-		clocks = <&cru SCLK_CIF_OUT>;
-		clock-names = "clk_cif_out";
-		pinctrl-names = "rockchip,camera_default",
-				"rockchip,camera_sleep";
-		pinctrl-0 = <&cam0_default_pins>;
-		pinctrl-1 = <&cam0_sleep_pins>;
-		rockchip,pd-gpio = <&gpio3 4 GPIO_ACTIVE_LOW>;
-		//rockchip,pwr-gpio = <&gpio3 13 0>;
-		rockchip,rst-gpio = <&gpio2 10 GPIO_ACTIVE_LOW>;
-		rockchip,camera-module-mclk-name = "clk_cif_out";
-		rockchip,camera-module-facing = "back";
-		rockchip,camera-module-name = "LA6111PA";
-		rockchip,camera-module-len-name = "YM6011P";
-		rockchip,camera-module-fov-h = "116";
-		rockchip,camera-module-fov-v = "61";
-		rockchip,camera-module-orientation = <0>;
-		rockchip,camera-module-iq-flip = <0>;
-		rockchip,camera-module-iq-mirror = <0>;
-		rockchip,camera-module-flip = <0>;
-		rockchip,camera-module-mirror = <1>;
-
-		rockchip,camera-module-defrect0 = <2688 1520 0 0 2688 1520>;
-		rockchip,camera-module-flash-support = <0>;
-		rockchip,camera-module-mipi-dphy-index = <0>;
-	};
-
 };
 
 &cpu_l0 {
@@ -1050,28 +1125,12 @@
 	status = "okay";
 };
 
-&cif_isp0 {
-	rockchip,camera-modules-attached = <&camera0>;
-	status = "okay";
-};
-
 &isp0_mmu {
 	status = "okay";
 };
 
-&cif_isp1 {
-	rockchip,camera-modules-attached = <&camera1>;
-	status = "disabled";
-};
-
 &isp1_mmu {
 	status = "okay";
-};
-
-&vpu {
-	status = "okay";
-	/* 0 means ion, 1 means drm */
-	//allocator = <0>;
 };
 
 &rkvdec {
