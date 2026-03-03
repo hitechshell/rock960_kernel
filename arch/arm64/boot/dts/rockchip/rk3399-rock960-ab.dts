@@ -275,8 +275,8 @@
 
             timing0: timing0 {
                 clock-frequency = <67000000>;
-                hactive = <1280>;
-                vactive = <720>;
+                hactive = <1440>;
+                vactive = <2560>;
                 hback-porch = <120>;
                 hfront-porch = <12>;
                 vback-porch = <4>;
