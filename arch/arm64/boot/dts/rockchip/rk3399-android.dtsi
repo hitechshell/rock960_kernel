@@ -77,6 +77,11 @@
 			compatible = "rockchip,stb-devinfo";
 			reg = <0x0 0x0 0x0 0x0>;
 		};
+
+		optee_memory: optee@8400000 {
+			reg = <0x0 0x08400000 0x0 0x02000000>;
+			no-map;
+		};
 	};
 
 	gpio_keys: gpio-keys {
